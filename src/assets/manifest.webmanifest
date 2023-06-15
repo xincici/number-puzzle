@@ -1,0 +1,16 @@
+{
+  "background_color": "purple",
+  "description": "Number puzzle by xincici",
+  "display": "fullscreen",
+  "icons": [
+    {
+      "src": "fox.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ],
+  "name": "Number Puzzle",
+  "short_name": "Number Puzzle",
+  "start_url": "/",
+  "id": "xincici-number-puzzle"
+}
