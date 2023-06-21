@@ -237,38 +237,38 @@ function checkResult() {
       background: rgba(255, 255, 255, 0);
     }
     &.cell-3 {
-      width: 180px;
+      width: 195px;
+      .cell {
+        width: 65px;
+        height: 65px;
+      }
+    }
+    &.cell-4 {
+      width: 240px;
       .cell {
         width: 60px;
         height: 60px;
       }
     }
-    &.cell-4 {
-      width: 220px;
+    &.cell-5 {
+      width: 275px;
       .cell {
         width: 55px;
         height: 55px;
       }
     }
-    &.cell-5 {
-      width: 250px;
+    &.cell-6 {
+      width: 300px;
       .cell {
         width: 50px;
         height: 50px;
-      }
-    }
-    &.cell-6 {
-      width: 270px;
-      .cell {
-        width: 45px;
-        height: 45px;
       }
     }
     .cell {
       display: inline-block;
       position: relative;
       box-sizing: border-box;
-      padding: 2px;
+      padding: 3px;
       .mask {
         width: 100%;
         height: 100%;
@@ -285,6 +285,7 @@ function checkResult() {
         align-items: center;
         justify-content: center;
         border: 1px solid #e1e1e1;
+        border-radius: 5px;
         font-size: 16px;
         font-weight: bold;
         color: #222;
