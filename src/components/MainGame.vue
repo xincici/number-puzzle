@@ -24,11 +24,14 @@
         <div
           class="inner"
           :class="{
-            hide: item === maxNumber,
+            hide: item === maxNumber && !gameData.mask[idx],
             even: item % 2 === 0,
             odd: item % 2 !== 0,
           }"
-        >{{ item }}</div>
+        >
+          <div class="mask" v-if="gameData.mask[idx]"></div>
+          {{ item }}
+        </div>
       </div>
       <div v-if="gameResult >= WIN" class="win">
         <span>🎉🎉 {{ i18n('tipWin') }} 🎉🎉</span>
@@ -51,14 +54,13 @@ const BIG_VAL = 3;
 const [GAMING, WIN, NB] = [0, 1, 2];
 const [TINY, MINI, SMALL, MIDDLE, LARGE] = ['tiny', 'mini', 'small', 'middle', 'large'];
 
-const neighbours = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 const clickCount = ref(0);
 const gameResult = ref(GAMING);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
 const bestScore = ref(localStorage.getItem(storageKey.value));
 
-const randomData = len => new Array(len * len).fill(1).map((v, idx) => idx + 1).sort(() => Math.random() - 0.5);
+const randomData = len => new Array(len).fill(1).map((v, idx) => idx + 1).sort(() => Math.random() - 0.5);
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 const gameData = reactive({
@@ -87,19 +89,18 @@ watch(gameResult, val => {
 });
 
 function initGame() {
-  gameData.list = randomData(difficulty.value);
-  gameData.mask = randomData(difficulty.value);
+  gameData.list = randomData(maxNumber.value);
+  gameData.mask = new Array(maxNumber.value).fill(1);
   gameResult.value = GAMING;
   clickCount.value = 0;
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
   }
+  toggleMask(0);
 }
 function toggleMask(idx) {
-  const row = ~~(idx / difficulty.value);
-  const col = idx % difficulty.value;
-  gameData.mask[row][col] = 1;
+  gameData.mask[idx] = 0;
   if (idx + 1 < difficulty.value * difficulty.value) {
     animationFrameId = requestAnimationFrame(() => {
       toggleMask(idx + 1);
@@ -119,14 +120,10 @@ function updateBestScore() {
 }
 function onCellClick(idx) {
   const len = difficulty.value;
-  const row = ~~(idx / len);
-  const col = idx % len;
-  neighbours.forEach(item => {
-    const newRow = row + item[0];
-    const newCol = col + item[1];
-    if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) return;
-    if (gameArr.value[newRow][newCol] !== maxNumber.value) return;
-    const newIdx = newRow * len + newCol;
+  [-1, 1, -len, len].forEach(diff => {
+    const newIdx = diff + idx;
+    if (newIdx < 0 || newIdx >= maxNumber.value) return;
+    if (gameData.list[newIdx] !== maxNumber.value) return;
     gameData.list[newIdx] = gameData.list[idx];
     gameData.list[idx] = maxNumber.value;
     clickCount.value++;
@@ -280,6 +277,7 @@ function checkResult() {
       .inner {
         cursor: pointer;
         display: flex;
+        position: relative;
         width: 100%;
         height: 100%;
         align-items: center;
