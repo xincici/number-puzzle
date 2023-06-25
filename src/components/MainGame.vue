@@ -56,11 +56,10 @@ const clickCount = ref(0);
 const gameResult = ref(GAMING);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
-const neighbours = computed(() => ([-1, 1, -difficulty.value, difficulty.value]));
-const randomCount = computed(() => 1 << difficulty.value);
+const neighbours = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 const bestScore = ref(localStorage.getItem(storageKey.value));
 
-const initData = len => new Array(len).fill(1).map((_, idx) => idx + 1);
+const initData = len => new Array(len).fill(1).map((_, idx) => idx + 1).sort(() => Math.random() - 0.5);
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 const gameData = reactive({
@@ -91,7 +90,6 @@ watch(gameResult, val => {
 function initGame() {
   gameData.list = initData(maxNumber.value);
   gameData.mask = new Array(maxNumber.value).fill(1);
-  randomOperations();
   gameResult.value = GAMING;
   clickCount.value = 0;
   if (animationFrameId) {
@@ -106,13 +104,17 @@ function swapTwoIdx(idx1, idx2) {
   gameData.list[idx2] = tmp;
 }
 function randomOperations() {
-  let lastIdx = maxNumber.value - 1;
+  const len = difficulty.value;
+  let lastRow = len - 1;
+  let lastCol = len - 1;
   for (let i = 0; i < randomCount.value; i++) {
-    const newIdx = neighbours.value[~~(Math.random() * 4)] + lastIdx;
-    if (newIdx >= 0 && newIdx < maxNumber.value) {
-      swapTwoIdx(lastIdx, newIdx);
-      lastIdx = newIdx;
-    }
+    const [dRow, dCol] = neighbours[~~(Math.random() * 4)];
+    const newRow = lastRow + dRow;
+    const newCol = lastCol + dCol;
+    if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) continue;
+    swapTwoIdx(lastRow * len + lastCol, newRow * len + newCol);
+    lastRow = newRow;
+    lastCol = newCol;
   }
 }
 function toggleMask(idx) {
@@ -135,9 +137,15 @@ function updateBestScore() {
   }
 }
 function onCellClick(idx) {
-  neighbours.value.forEach(diff => {
-    const newIdx = diff + idx;
-    if (newIdx < 0 || newIdx >= maxNumber.value) return;
+  const len = difficulty.value;
+  const lastRow = ~~(idx / len);
+  const lastCol = idx % len;
+  neighbours.forEach(diff => {
+    const [dRow, dCol] = diff;
+    const newRow = lastRow + dRow;
+    const newCol = lastCol + dCol;
+    if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) return;
+    const newIdx = newRow * len + newCol;
     if (gameData.list[newIdx] !== maxNumber.value) return;
     swapTwoIdx(idx, newIdx);
     clickCount.value++;
@@ -227,7 +235,8 @@ function checkResult() {
     display: inline-block;
     position: relative;
     margin: 60px auto 30px;
-    .win,.automask {
+    padding: 15px;
+    .win {
       background-color: #f1f1f1;
       position: absolute;
       width: 100%;
@@ -242,9 +251,6 @@ function checkResult() {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-    }
-    .automask {
-      background: rgba(255, 255, 255, 0);
     }
     &.cell-3 {
       width: 195px;
