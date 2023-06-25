@@ -50,17 +50,17 @@ import { theme } from '../utils/theme';
 import confetti from '../utils/confetti';
 import { difficulty, changeDifficulty, MIN_DIFFICULTY, MAX_DIFFICULTY } from '../utils/difficulty';
 
-const BIG_VAL = 3;
 const [GAMING, WIN, NB] = [0, 1, 2];
-const [TINY, MINI, SMALL, MIDDLE, LARGE] = ['tiny', 'mini', 'small', 'middle', 'large'];
 
 const clickCount = ref(0);
 const gameResult = ref(GAMING);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
+const neighbours = computed(() => ([-1, 1, -difficulty.value, difficulty.value]));
+const randomCount = computed(() => 1 << difficulty.value);
 const bestScore = ref(localStorage.getItem(storageKey.value));
 
-const randomData = len => new Array(len).fill(1).map((v, idx) => idx + 1).sort(() => Math.random() - 0.5);
+const initData = len => new Array(len).fill(1).map((_, idx) => idx + 1);
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 const gameData = reactive({
@@ -89,8 +89,9 @@ watch(gameResult, val => {
 });
 
 function initGame() {
-  gameData.list = randomData(maxNumber.value);
+  gameData.list = initData(maxNumber.value);
   gameData.mask = new Array(maxNumber.value).fill(1);
+  randomOperations();
   gameResult.value = GAMING;
   clickCount.value = 0;
   if (animationFrameId) {
@@ -98,6 +99,21 @@ function initGame() {
     animationFrameId = null;
   }
   toggleMask(0);
+}
+function swapTwoIdx(idx1, idx2) {
+  const tmp = gameData.list[idx1];
+  gameData.list[idx1] = gameData.list[idx2];
+  gameData.list[idx2] = tmp;
+}
+function randomOperations() {
+  let lastIdx = maxNumber.value - 1;
+  for (let i = 0; i < randomCount.value; i++) {
+    const newIdx = neighbours.value[~~(Math.random() * 4)] + lastIdx;
+    if (newIdx >= 0 && newIdx < maxNumber.value) {
+      swapTwoIdx(lastIdx, newIdx);
+      lastIdx = newIdx;
+    }
+  }
 }
 function toggleMask(idx) {
   gameData.mask[idx] = 0;
@@ -119,20 +135,17 @@ function updateBestScore() {
   }
 }
 function onCellClick(idx) {
-  const len = difficulty.value;
-  [-1, 1, -len, len].forEach(diff => {
+  neighbours.value.forEach(diff => {
     const newIdx = diff + idx;
     if (newIdx < 0 || newIdx >= maxNumber.value) return;
     if (gameData.list[newIdx] !== maxNumber.value) return;
-    gameData.list[newIdx] = gameData.list[idx];
-    gameData.list[idx] = maxNumber.value;
+    swapTwoIdx(idx, newIdx);
     clickCount.value++;
   });
   checkResult();
 }
 function checkResult() {
-  const len = difficulty.value;
-  for (let i = 0; i < len * len; i++) {
+  for (let i = 0; i < maxNumber.value; i++) {
     if (gameData.list[i] !== i + 1) return;
   }
   gameResult.value = WIN;
