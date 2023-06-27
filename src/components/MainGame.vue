@@ -53,13 +53,15 @@ import { difficulty, changeDifficulty, MIN_DIFFICULTY, MAX_DIFFICULTY } from '..
 const [GAMING, WIN, NB] = [0, 1, 2];
 
 const clickCount = ref(0);
+const lastRandom = ref(0);
 const gameResult = ref(GAMING);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
-const neighbours = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+const randomCount = computed(() => 4 << difficulty.value);
+const neighbours = [[-1, 0], [0, 1], [0, -1], [1, 0]];
 const bestScore = ref(localStorage.getItem(storageKey.value));
 
-const initData = len => new Array(len).fill(1).map((_, idx) => idx + 1).sort(() => Math.random() - 0.5);
+const initData = len => new Array(len).fill(1).map((_, idx) => idx + 1);
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 const gameData = reactive({
@@ -90,8 +92,10 @@ watch(gameResult, val => {
 function initGame() {
   gameData.list = initData(maxNumber.value);
   gameData.mask = new Array(maxNumber.value).fill(1);
+  randomOperations();
   gameResult.value = GAMING;
   clickCount.value = 0;
+  lastRandom.value = 0;
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
@@ -103,12 +107,23 @@ function swapTwoIdx(idx1, idx2) {
   gameData.list[idx1] = gameData.list[idx2];
   gameData.list[idx2] = tmp;
 }
+
+function getRandom() {
+  while (true) {
+    const newIdx = ~~(Math.random() * 4)
+    if (lastRandom.value + newIdx !== 3) {
+      lastRandom.value = newIdx;
+      break;
+    }
+  }
+  return neighbours[lastRandom.value];
+}
 function randomOperations() {
   const len = difficulty.value;
   let lastRow = len - 1;
   let lastCol = len - 1;
   for (let i = 0; i < randomCount.value; i++) {
-    const [dRow, dCol] = neighbours[~~(Math.random() * 4)];
+    const [dRow, dCol] = getRandom();
     const newRow = lastRow + dRow;
     const newCol = lastCol + dCol;
     if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) continue;
