@@ -27,6 +27,7 @@
             hide: item === maxNumber && !gameData.mask[idx],
             even: item % 2 === 0,
             odd: item % 2 !== 0,
+            shake: gameData.shake === idx,
           }"
         >
           <div class="mask" v-if="gameData.mask[idx]"></div>
@@ -67,6 +68,7 @@ const sleep = ms => new Promise(res => setTimeout(res, ms));
 const gameData = reactive({
   list: [],
   mask: [],
+  shake: -1,
 });
 const gameArr = computed(() => {
   const len = difficulty.value;
@@ -155,6 +157,7 @@ function onCellClick(idx) {
   const len = difficulty.value;
   const lastRow = ~~(idx / len);
   const lastCol = idx % len;
+  let operate = false;
   neighbours.forEach(diff => {
     const [dRow, dCol] = diff;
     const newRow = lastRow + dRow;
@@ -162,10 +165,18 @@ function onCellClick(idx) {
     if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) return;
     const newIdx = newRow * len + newCol;
     if (gameData.list[newIdx] !== maxNumber.value) return;
+    operate = true;
     swapTwoIdx(idx, newIdx);
     clickCount.value++;
   });
+  if (!operate) shakeCell(idx);
   checkResult();
+}
+function shakeCell(idx) {
+  gameData.shake = idx;
+  setTimeout(() => {
+    gameData.shake = -1;
+  }, 100);
 }
 function checkResult() {
   for (let i = 0; i < maxNumber.value; i++) {
@@ -176,6 +187,14 @@ function checkResult() {
 </script>
 
 <style scoped lang="scss">
+@keyframes shake {
+  from {
+    transform: translateX(-12%);
+  }
+  to {
+    transform: translateX(12%);
+  }
+}
 .wrapper {
   width: 100vw;
   min-width: 360px;
@@ -324,6 +343,9 @@ function checkResult() {
         opacity: 1;
         &.hide {
           visibility: hidden;
+        }
+        &.shake {
+          animation: 0.025s ease-in-out 0s infinite shake;
         }
         &.even {
           background-color: #e5e5e5;
