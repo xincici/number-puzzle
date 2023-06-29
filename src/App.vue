@@ -9,8 +9,8 @@ import MainGame from './components/MainGame.vue';
 <style lang="scss">
 html, body, #app {
   height: 100vh;
-  overflow-y: hidden;
   margin: 0;
+  touch-action: none;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
