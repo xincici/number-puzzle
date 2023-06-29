@@ -10,7 +10,7 @@ import MainGame from './components/MainGame.vue';
 html, body, #app {
   height: 100vh;
   margin: 0;
-  touch-action: none;
+  touch-action: manipulation;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

@@ -59,7 +59,7 @@ const gameResult = ref(GAMING);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
 const randomCount = computed(() => 4 << difficulty.value);
-const neighbours = [[-1, 0], [0, 1], [0, -1], [1, 0]];
+const neighbours = [[-1, 0], [0, -1], [0, 1], [1, 0]]; // order matters
 const bestScore = ref(localStorage.getItem(storageKey.value));
 
 const initData = len => new Array(len).fill(1).map((_, idx) => idx + 1);
@@ -136,10 +136,12 @@ function randomOperations() {
 }
 function toggleMask(idx) {
   gameData.mask[idx] = 0;
-  if (idx + 1 < difficulty.value * difficulty.value) {
+  if (idx + 1 < maxNumber.value) {
     animationFrameId = requestAnimationFrame(() => {
       toggleMask(idx + 1);
     });
+  } else {
+    checkResult();
   }
 }
 function onScoreReset() {
@@ -159,9 +161,8 @@ function onCellClick(idx) {
   const lastCol = idx % len;
   let operate = false;
   neighbours.forEach(diff => {
-    const [dRow, dCol] = diff;
-    const newRow = lastRow + dRow;
-    const newCol = lastCol + dCol;
+    const newRow = lastRow + diff[0];
+    const newCol = lastCol + diff[1];
     if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) return;
     const newIdx = newRow * len + newCol;
     if (gameData.list[newIdx] !== maxNumber.value) return;
@@ -169,8 +170,8 @@ function onCellClick(idx) {
     swapTwoIdx(idx, newIdx);
     clickCount.value++;
   });
-  if (!operate) shakeCell(idx);
-  checkResult();
+  if (operate) checkResult();
+  else shakeCell(idx);
 }
 function shakeCell(idx) {
   gameData.shake = idx;
@@ -226,9 +227,6 @@ function checkResult() {
   }
   .score-area {
     margin: 50px 0 15px;
-  }
-  button,button:disabled {
-    touch-action: manipulation;
   }
   .opt-icon,.game-icon {
     cursor: pointer;
