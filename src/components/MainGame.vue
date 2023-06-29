@@ -24,9 +24,10 @@
         <div
           class="inner"
           :class="{
-            hide: item === maxNumber && !gameData.mask[idx],
+            hide: item === maxNumber && !gameData.mask[idx] && !showWin,
             even: item % 2 === 0,
             odd: item % 2 !== 0,
+            zoom: gameResult >= WIN && gameData.zoom[idx],
             shake: gameData.shake === idx,
           }"
         >
@@ -34,7 +35,7 @@
           {{ item }}
         </div>
       </div>
-      <div v-if="gameResult >= WIN" class="win">
+      <div v-if="showWin" class="win">
         <span>🎉🎉 {{ i18n('tipWin') }} 🎉🎉</span>
         <span v-if="gameResult === NB">{{ i18n('newBest') }}</span>
       </div>
@@ -56,9 +57,11 @@ const [GAMING, WIN, NB] = [0, 1, 2];
 const clickCount = ref(0);
 const lastRandom = ref(0);
 const gameResult = ref(GAMING);
+const showWin = ref(false);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
 const randomCount = computed(() => 4 << difficulty.value);
+const animateTime = computed(() => ~~(800 / maxNumber.value));
 const neighbours = [[-1, 0], [0, -1], [0, 1], [1, 0]]; // order matters
 const bestScore = ref(localStorage.getItem(storageKey.value));
 
@@ -68,6 +71,7 @@ const sleep = ms => new Promise(res => setTimeout(res, ms));
 const gameData = reactive({
   list: [],
   mask: [],
+  zoom: [],
   shake: -1,
 });
 const gameArr = computed(() => {
@@ -78,7 +82,9 @@ const gameArr = computed(() => {
   }
   return res;
 });
-let animationFrameId = null;
+let maskTimer = null;
+let zoomTimer = null;
+let winTimer = null;
 
 watchEffect(() => {
   bestScore.value = localStorage.getItem(storageKey.value);
@@ -87,20 +93,33 @@ watch(difficulty, initGame, { immediate: true });
 watch(gameResult, val => {
   if (val === WIN) {
     updateBestScore();
-    confetti();
+    toggleZoom(0);
   }
+});
+watch(showWin, val => {
+  if (val) confetti();
 });
 
 function initGame() {
   gameData.list = initData(maxNumber.value);
   gameData.mask = new Array(maxNumber.value).fill(1);
+  gameData.zoom = [];
   randomOperations();
   gameResult.value = GAMING;
+  showWin.value = false;
   clickCount.value = 0;
   lastRandom.value = 0;
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = null;
+  if (maskTimer) {
+    clearTimeout(maskTimer);
+    maskTimer = null;
+  }
+  if (zoomTimer) {
+    clearTimeout(zoomTimer);
+    zoomTimer = null;
+  }
+  if (winTimer) {
+    clearTimeout(winTimer);
+    winTimer = null;
   }
   toggleMask(0);
 }
@@ -137,11 +156,23 @@ function randomOperations() {
 function toggleMask(idx) {
   gameData.mask[idx] = 0;
   if (idx + 1 < maxNumber.value) {
-    animationFrameId = requestAnimationFrame(() => {
+    maskTimer = setTimeout(() => {
       toggleMask(idx + 1);
-    });
+    }, animateTime.value);
   } else {
     checkResult();
+  }
+}
+function toggleZoom(idx) {
+  gameData.zoom[idx] = 1;
+  if (idx + 1 < maxNumber.value) {
+    zoomTimer = setTimeout(() => {
+      toggleZoom(idx + 1);
+    }, animateTime.value);
+  } else {
+    winTimer = setTimeout(() => {
+      showWin.value = true;
+    }, 300);
   }
 }
 function onScoreReset() {
@@ -156,6 +187,7 @@ function updateBestScore() {
   }
 }
 function onCellClick(idx) {
+  if (gameResult.value >= WIN) return;
   const len = difficulty.value;
   const lastRow = ~~(idx / len);
   const lastCol = idx % len;
@@ -196,6 +228,18 @@ function checkResult() {
     transform: translateX(12%);
   }
 }
+@keyframes zoom {
+  from {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 .wrapper {
   width: 100vw;
   min-width: 360px;
@@ -344,6 +388,9 @@ function checkResult() {
         }
         &.shake {
           animation: 0.025s ease-in-out 0s infinite shake;
+        }
+        &.zoom {
+          animation: 0.08s ease-in-out 0s zoom;
         }
         &.even {
           background-color: #e5e5e5;
