@@ -40,6 +40,34 @@
         <span v-if="gameResult === NB">{{ i18n('newBest') }}</span>
       </div>
     </div>
+    <div class="rocker-area">
+      <button
+        @click="rockerClick(1, 0)"
+        :disabled="false"
+      >
+        <i i-mdi-arrow-up-bold-circle />
+      </button>
+      <br />
+      <button
+        @click="rockerClick(0, 1)"
+        :disabled="false"
+      >
+        <i i-mdi-arrow-left-bold-circle />
+      </button>
+      <button
+        @click="rockerClick(0, -1)"
+        :disabled="false"
+      >
+        <i i-mdi-arrow-right-bold-circle />
+      </button>
+      <br />
+      <button
+        @click="rockerClick(-1, 0)"
+        :disabled="false"
+      >
+        <i i-mdi-arrow-down-bold-circle />
+      </button>
+    </div>
   </div>
 </template>
 
@@ -60,6 +88,7 @@ const gameResult = ref(GAMING);
 const showWin = ref(false);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
+const maxCoord = computed(() => ([difficulty.value - 1, difficulty.value - 1]));
 const randomCount = computed(() => 4 << difficulty.value);
 const animateTime = computed(() => ~~(800 / maxNumber.value));
 const neighbours = [[-1, 0], [0, -1], [0, 1], [1, 0]]; // order matters
@@ -104,6 +133,7 @@ function initGame() {
   gameData.list = initData(maxNumber.value);
   gameData.mask = new Array(maxNumber.value).fill(1);
   gameData.zoom = [];
+  maxCoord.value[0] = maxCoord.value[1] = difficulty.value - 1;
   randomOperations();
   gameResult.value = GAMING;
   showWin.value = false;
@@ -141,16 +171,16 @@ function getRandom() {
 }
 function randomOperations() {
   const len = difficulty.value;
-  let lastRow = len - 1;
-  let lastCol = len - 1;
+  let lastRow = maxCoord.value[0];
+  let lastCol = maxCoord.value[1];
   for (let i = 0; i < randomCount.value; i++) {
     const [dRow, dCol] = getRandom();
     const newRow = lastRow + dRow;
     const newCol = lastCol + dCol;
     if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) continue;
     swapTwoIdx(lastRow * len + lastCol, newRow * len + newCol);
-    lastRow = newRow;
-    lastCol = newCol;
+    maxCoord.value[0] = lastRow = newRow;
+    maxCoord.value[1] = lastCol = newCol;
   }
 }
 function toggleMask(idx) {
@@ -210,6 +240,16 @@ function shakeCell(idx) {
   setTimeout(() => {
     gameData.shake = -1;
   }, 100);
+}
+function rockerClick(dRow, dCol) {
+  const len = difficulty.value;
+  const newRow = maxCoord.value[0] + dRow;
+  const newCol = maxCoord.value[1] + dCol;
+  if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) return;
+  const newIdx = newRow * len + newCol;
+  onCellClick(newIdx);
+  maxCoord.value[0] = newRow;
+  maxCoord.value[1] = newCol;
 }
 function checkResult() {
   for (let i = 0; i < maxNumber.value; i++) {
@@ -310,7 +350,7 @@ function checkResult() {
   .game-area {
     display: inline-block;
     position: relative;
-    margin: 60px auto 30px;
+    margin: 40px auto 30px;
     padding: 15px;
     .win {
       background-color: #f1f1f1;
@@ -399,6 +439,17 @@ function checkResult() {
           background-color: #ddffdd;
         }
       }
+    }
+  }
+  .rocker-area {
+    display: none;
+    button {
+      height: 56px;
+      width: 56px;
+      border: 1px solid #e1e1e1;
+      border-radius: 5px;
+      margin: 1px 29px;
+      font-size: 24px;
     }
   }
 }
