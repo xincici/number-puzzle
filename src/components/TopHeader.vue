@@ -3,9 +3,8 @@
     <span class="item-wrapper">
       <HelpDialog />
     </span>
-    <span class="item-wrapper" @click="audioPlay = !audioPlay">
-      <i i-carbon-pause-outline v-if="audioPlay" />
-      <i i-carbon-play-outline v-else />
+    <span class="item-wrapper">
+      <EnableRocker />
     </span>
     <span class="title">{{ i18n('gameTitle') }}</span>
     <span class="item-wrapper" @click="toggleTheme">
@@ -15,27 +14,17 @@
     <span class="item-wrapper" @click="toggleLanguage">
       <i i-carbon-ibm-watson-language-translator />
     </span>
-    <audio :src="audio" ref="audioRef" loop="true"></audio>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref } from 'vue';
 import HelpDialog from './HelpDialog.vue';
+import EnableRocker from './EnableRocker.vue';
 
-import audio from '../assets/yzcw.mp3';
 import { toggle as toggleLanguage } from '../plugins/i18n';
 import { isDark, toggle as toggleTheme } from '../utils/theme';
 
-const audioRef = ref(null);
-const audioPlay = ref(false);
-
-onMounted(() => {
-  watch(audioPlay, val => {
-    if (val) audioRef.value.play();
-    else audioRef.value.pause();
-  });
-});
 </script>
 
 <style scoped lang="scss">

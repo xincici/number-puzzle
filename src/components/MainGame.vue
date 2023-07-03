@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" :class="theme">
+  <div class="wrapper" :class="`${theme} ${enableRocker? 'rocker' : '' }`">
     <TopHeader />
     <div class="score-area">
       {{ i18n('bestScore') }}: {{ bestScore || '--' }} <EasterEgg @onScoreReset="onScoreReset" /> {{ i18n('availableClicks') }}: {{ clickCount }}
@@ -78,6 +78,7 @@ import EasterEgg from './EasterEgg.vue';
 import TopHeader from './TopHeader.vue';
 import { theme } from '../utils/theme';
 import confetti from '../utils/confetti';
+import { enableRocker } from '../utils/rocker';
 import { difficulty, changeDifficulty, MIN_DIFFICULTY, MAX_DIFFICULTY } from '../utils/difficulty';
 
 const [GAMING, WIN, NB] = [0, 1, 2];
@@ -306,10 +307,23 @@ function checkResult() {
       }
     }
   }
+  &.rocker {
+    .rocker-area {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .score-area {
+      margin-top: 20px;
+    }
+    .game-area {
+      margin-top: 0px;
+    }
+  }
   .header-wrapper {
     border-bottom: 1px solid #eee;
   }
   .score-area {
+    transition: margin-top 0.3s ease-in-out;
     margin: 50px 0 15px;
   }
   .opt-icon,.game-icon {
@@ -350,7 +364,8 @@ function checkResult() {
   .game-area {
     display: inline-block;
     position: relative;
-    margin: 40px auto 30px;
+    transition: margin-top 0.3s ease-in-out;
+    margin: 40px auto 20px;
     padding: 15px;
     .win {
       background-color: #f1f1f1;
@@ -442,6 +457,9 @@ function checkResult() {
     }
   }
   .rocker-area {
+    transition: all 0.3s ease-in-out;
+    transform: translateY(100px);
+    opacity: 0;
     button {
       height: 56px;
       width: 56px;
@@ -449,6 +467,11 @@ function checkResult() {
       border-radius: 5px;
       margin: 1px 29px;
       font-size: 24px;
+      text-align: center;
+      color: #222;
+      &:disabled {
+        color: #aaa;
+      }
     }
   }
 }
