@@ -460,6 +460,7 @@ function checkResult() {
     transition: all 0.3s ease-in-out;
     transform: translateY(100px);
     opacity: 0;
+    margin-bottom: 20px;
     button {
       height: 56px;
       width: 56px;
@@ -468,6 +469,8 @@ function checkResult() {
       margin: 1px 29px;
       font-size: 24px;
       text-align: center;
+      vertical-align: middle;
+      box-sizing: border-box;
       color: #222;
       &:disabled {
         color: #aaa;
