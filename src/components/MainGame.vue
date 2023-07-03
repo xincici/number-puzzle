@@ -83,12 +83,11 @@ import { difficulty, changeDifficulty, MIN_DIFFICULTY, MAX_DIFFICULTY } from '..
 const [GAMING, WIN, NB] = [0, 1, 2];
 
 const clickCount = ref(0);
-const lastRandom = ref(0);
 const gameResult = ref(GAMING);
 const showWin = ref(false);
 const storageKey = computed(() => `__number_puzzle__${difficulty.value}`);
 const maxNumber = computed(() => difficulty.value * difficulty.value);
-const maxCoord = computed(() => ([difficulty.value - 1, difficulty.value - 1]));
+const maxIndex = ref(-1);
 const randomCount = computed(() => 4 << difficulty.value);
 const animateTime = computed(() => ~~(800 / maxNumber.value));
 const neighbours = [[-1, 0], [0, -1], [0, 1], [1, 0]]; // order matters
@@ -114,6 +113,7 @@ const gameArr = computed(() => {
 let maskTimer = null;
 let zoomTimer = null;
 let winTimer = null;
+let lastRandom = 0; // 最后一次随机的下标
 
 watchEffect(() => {
   bestScore.value = localStorage.getItem(storageKey.value);
@@ -130,58 +130,55 @@ watch(showWin, val => {
 });
 
 function initGame() {
+  clearTimer();
   gameData.list = initData(maxNumber.value);
   gameData.mask = new Array(maxNumber.value).fill(1);
   gameData.zoom = [];
-  maxCoord.value[0] = maxCoord.value[1] = difficulty.value - 1;
-  randomOperations();
+  maxIndex.value = maxNumber.value - 1;
   gameResult.value = GAMING;
   showWin.value = false;
   clickCount.value = 0;
-  lastRandom.value = 0;
-  if (maskTimer) {
-    clearTimeout(maskTimer);
-    maskTimer = null;
-  }
-  if (zoomTimer) {
-    clearTimeout(zoomTimer);
-    zoomTimer = null;
-  }
-  if (winTimer) {
-    clearTimeout(winTimer);
-    winTimer = null;
-  }
+  lastRandom = 0;
+  randomOperations();
   toggleMask(0);
+}
+function clearTimer() {
+  if (maskTimer) clearTimeout(maskTimer);
+  if (zoomTimer) clearTimeout(zoomTimer);
+  if (winTimer) clearTimeout(winTimer);
+  maskTimer = zoomTimer = winTimer = null;
 }
 function swapTwoIdx(idx1, idx2) {
   const tmp = gameData.list[idx1];
   gameData.list[idx1] = gameData.list[idx2];
   gameData.list[idx2] = tmp;
+  maxIndex.value = idx1;
 }
 
 function getRandom() {
   while (true) {
     const newIdx = ~~(Math.random() * 4)
-    if (lastRandom.value + newIdx !== 3) {
-      lastRandom.value = newIdx;
+    if (lastRandom + newIdx !== 3) {
+      lastRandom = newIdx;
       break;
     }
   }
-  return neighbours[lastRandom.value];
+  return neighbours[lastRandom];
 }
 function randomOperations() {
   const len = difficulty.value;
-  let lastRow = maxCoord.value[0];
-  let lastCol = maxCoord.value[1];
+  let lastRow = len - 1;
+  let lastCol = len - 1;
   for (let i = 0; i < randomCount.value; i++) {
     const [dRow, dCol] = getRandom();
     const newRow = lastRow + dRow;
     const newCol = lastCol + dCol;
     if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) continue;
-    swapTwoIdx(lastRow * len + lastCol, newRow * len + newCol);
-    maxCoord.value[0] = lastRow = newRow;
-    maxCoord.value[1] = lastCol = newCol;
+    swapTwoIdx(newRow * len + newCol, lastRow * len + lastCol);
+    lastRow = newRow;
+    lastCol = newCol;
   }
+  maxIndex.value = gameData.list.indexOf(maxNumber.value);
 }
 function toggleMask(idx) {
   gameData.mask[idx] = 0;
@@ -232,8 +229,11 @@ function onCellClick(idx) {
     swapTwoIdx(idx, newIdx);
     clickCount.value++;
   });
-  if (operate) checkResult();
-  else shakeCell(idx);
+  if (operate) {
+    checkResult();
+  } else {
+    shakeCell(idx);
+  }
 }
 function shakeCell(idx) {
   gameData.shake = idx;
@@ -243,13 +243,13 @@ function shakeCell(idx) {
 }
 function rockerClick(dRow, dCol) {
   const len = difficulty.value;
-  const newRow = maxCoord.value[0] + dRow;
-  const newCol = maxCoord.value[1] + dCol;
+  const lastRow = ~~(maxIndex.value / len);
+  const lastCol = maxIndex.value % len;
+  const newRow = lastRow + dRow;
+  const newCol = lastCol + dCol;
   if (newRow < 0 || newRow >= len || newCol < 0 || newCol >= len) return;
   const newIdx = newRow * len + newCol;
   onCellClick(newIdx);
-  maxCoord.value[0] = newRow;
-  maxCoord.value[1] = newCol;
 }
 function checkResult() {
   for (let i = 0; i < maxNumber.value; i++) {
@@ -442,7 +442,6 @@ function checkResult() {
     }
   }
   .rocker-area {
-    display: none;
     button {
       height: 56px;
       width: 56px;
