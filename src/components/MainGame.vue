@@ -45,27 +45,27 @@
         @click="rockerClick(1, 0)"
         :disabled="false"
       >
-        <i i-mdi-arrow-up-bold-circle />
+        <i i-mdi-arrow-up-bold-box />
       </button>
       <br />
       <button
         @click="rockerClick(0, 1)"
         :disabled="false"
       >
-        <i i-mdi-arrow-left-bold-circle />
+        <i i-mdi-arrow-left-bold-box />
       </button>
       <button
         @click="rockerClick(0, -1)"
         :disabled="false"
       >
-        <i i-mdi-arrow-right-bold-circle />
+        <i i-mdi-arrow-right-bold-box />
       </button>
       <br />
       <button
         @click="rockerClick(-1, 0)"
         :disabled="false"
       >
-        <i i-mdi-arrow-down-bold-circle />
+        <i i-mdi-arrow-down-bold-box />
       </button>
     </div>
   </div>
