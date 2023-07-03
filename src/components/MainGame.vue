@@ -468,6 +468,7 @@ function checkResult() {
       border-radius: 5px;
       margin: 1px 29px;
       font-size: 24px;
+      display: inline-block;
       text-align: center;
       vertical-align: middle;
       box-sizing: border-box;
