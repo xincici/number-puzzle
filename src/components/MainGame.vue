@@ -43,27 +43,27 @@
     <div class="rocker-area">
       <button
         @click="rockerClick(1, 0)"
-        :disabled="false"
+        :disabled="rockerDisable[0]"
       >
         <i i-mdi-arrow-up-bold-box />
       </button>
       <br />
       <button
         @click="rockerClick(0, 1)"
-        :disabled="false"
+        :disabled="rockerDisable[1]"
       >
         <i i-mdi-arrow-left-bold-box />
       </button>
       <button
         @click="rockerClick(0, -1)"
-        :disabled="false"
+        :disabled="rockerDisable[2]"
       >
         <i i-mdi-arrow-right-bold-box />
       </button>
       <br />
       <button
         @click="rockerClick(-1, 0)"
-        :disabled="false"
+        :disabled="rockerDisable[3]"
       >
         <i i-mdi-arrow-down-bold-box />
       </button>
@@ -91,6 +91,18 @@ const maxNumber = computed(() => difficulty.value * difficulty.value);
 const maxIndex = ref(-1);
 const randomCount = computed(() => 4 << difficulty.value);
 const animateTime = computed(() => ~~(800 / maxNumber.value));
+const rockerDisable = computed(() => {
+  if (gameResult.value !== GAMING) return new Array(4).fill(true);
+  const len = difficulty.value;
+  const maxRow = ~~(maxIndex.value / len);
+  const maxCol = maxIndex.value % len;
+  const res = [];
+  res[0] = maxRow === len - 1;
+  res[1] = maxCol === len - 1;
+  res[2] = maxCol === 0;
+  res[3] = maxRow === 0;
+  return res;
+});
 const neighbours = [[-1, 0], [0, -1], [0, 1], [1, 0]]; // order matters
 const bestScore = ref(localStorage.getItem(storageKey.value));
 
@@ -467,12 +479,15 @@ function checkResult() {
       border: 1px solid #e1e1e1;
       border-radius: 5px;
       margin: 1px 29px;
+      padding: 0;
       font-size: 24px;
       display: inline-block;
       text-align: center;
       vertical-align: middle;
-      box-sizing: border-box;
       color: #222;
+      i {
+        margin: 0;
+      }
       &:disabled {
         color: #aaa;
       }
