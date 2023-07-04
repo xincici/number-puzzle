@@ -2,7 +2,9 @@
   <div class="wrapper" :class="`${theme} ${enableRocker? 'rocker' : '' }`">
     <TopHeader />
     <div class="score-area">
-      {{ i18n('bestScore') }}: {{ bestScore || '--' }} <EasterEgg @onScoreReset="onScoreReset" /> {{ i18n('availableClicks') }}: {{ clickCount }}
+      {{ i18n('bestScore') }}: {{ bestScore === null ? '--' : bestScore }}
+      <EasterEgg @onScoreReset="onScoreReset" />
+      {{ i18n('availableClicks') }}: {{ clickCount }}
     </div>
     <div class="opt-area">
       <button @click="changeDifficulty(-1)" class="opt-icon" :class="{disable: difficulty === MIN_DIFFICULTY}">
@@ -96,15 +98,15 @@ const rockerDisable = computed(() => {
   const len = difficulty.value;
   const maxRow = ~~(maxIndex.value / len);
   const maxCol = maxIndex.value % len;
-  const res = [];
-  res[0] = maxRow === len - 1;
-  res[1] = maxCol === len - 1;
-  res[2] = maxCol === 0;
-  res[3] = maxRow === 0;
-  return res;
+  return [
+    maxRow === len - 1,
+    maxCol === len - 1,
+    maxCol === 0,
+    maxRow === 0
+  ];
 });
 const neighbours = [[-1, 0], [0, -1], [0, 1], [1, 0]]; // order matters
-const bestScore = ref(localStorage.getItem(storageKey.value));
+const bestScore = ref(localStorage.getItem(storageKey.value) || null);
 
 const initData = len => new Array(len).fill(1).map((_, idx) => idx + 1);
 const sleep = ms => new Promise(res => setTimeout(res, ms));
@@ -115,21 +117,13 @@ const gameData = reactive({
   zoom: [],
   shake: -1,
 });
-const gameArr = computed(() => {
-  const len = difficulty.value;
-  const res = new Array(len);
-  for (let i = 0; i < len; i++) {
-    res[i] = [...gameData.list.slice(i * len, i * len + len)];
-  }
-  return res;
-});
 let maskTimer = null;
 let zoomTimer = null;
 let winTimer = null;
 let lastRandom = 0; // 最后一次随机的下标
 
 watchEffect(() => {
-  bestScore.value = localStorage.getItem(storageKey.value);
+  bestScore.value = localStorage.getItem(storageKey.value) || null;
 });
 watch(difficulty, initGame, { immediate: true });
 watch(gameResult, val => {
@@ -220,7 +214,7 @@ function onScoreReset() {
 }
 function updateBestScore() {
   const score = clickCount.value;
-  if (!bestScore.value || score < bestScore.value) {
+  if (bestScore.value === null || score < bestScore.value) {
     localStorage.setItem(storageKey.value, score);
     bestScore.value = score;
     gameResult.value = NB;
@@ -242,11 +236,8 @@ function onCellClick(idx) {
     swapTwoIdx(idx, newIdx);
     clickCount.value++;
   });
-  if (operate) {
-    checkResult();
-  } else {
-    shakeCell(idx);
-  }
+  if (operate) checkResult();
+  else shakeCell(idx);
 }
 function shakeCell(idx) {
   gameData.shake = idx;
