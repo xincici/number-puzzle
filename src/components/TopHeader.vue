@@ -3,8 +3,9 @@
     <span class="item-wrapper">
       <HelpDialog />
     </span>
-    <span class="item-wrapper">
-      <EnableRocker />
+    <span class="item-wrapper" @click="toggleRocker">
+      <i i-mdi-power-socket-fr v-if="rocker" />
+      <i i-mdi-cursor-move v-else />
     </span>
     <span class="title">{{ i18n('gameTitle') }}</span>
     <span class="item-wrapper" @click="toggleTheme">
@@ -20,10 +21,10 @@
 <script setup>
 import { ref } from 'vue';
 import HelpDialog from './HelpDialog.vue';
-import EnableRocker from './EnableRocker.vue';
 
 import { toggle as toggleLanguage } from '../plugins/i18n';
 import { isDark, toggle as toggleTheme } from '../utils/theme';
+import { rocker, toggle as toggleRocker } from '../utils/rocker';
 
 </script>
 

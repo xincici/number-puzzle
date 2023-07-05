@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" :class="`${theme} ${enableRocker? 'rocker' : '' }`">
+  <div class="wrapper" :class="`${theme} ${rocker? 'rocker' : '' }`">
     <TopHeader />
     <div class="score-area">
       {{ i18n('bestScore') }}: {{ bestScore === null ? '--' : bestScore }}
@@ -80,7 +80,7 @@ import EasterEgg from './EasterEgg.vue';
 import TopHeader from './TopHeader.vue';
 import { theme } from '../utils/theme';
 import confetti from '../utils/confetti';
-import { enableRocker } from '../utils/rocker';
+import { rocker } from '../utils/rocker';
 import { difficulty, changeDifficulty, MIN_DIFFICULTY, MAX_DIFFICULTY } from '../utils/difficulty';
 
 const [GAMING, WIN, NB] = [0, 1, 2];
