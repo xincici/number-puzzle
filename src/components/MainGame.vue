@@ -47,27 +47,27 @@
         @click="rockerClick(1, 0)"
         :disabled="rockerDisable[0]"
       >
-        <i i-mdi-arrow-up-bold-box />
+        <i i-mdi-arrow-up-bold-circle />
       </button>
       <br />
       <button
         @click="rockerClick(0, 1)"
         :disabled="rockerDisable[1]"
       >
-        <i i-mdi-arrow-left-bold-box />
+        <i i-mdi-arrow-left-bold-circle />
       </button>
       <button
         @click="rockerClick(0, -1)"
         :disabled="rockerDisable[2]"
       >
-        <i i-mdi-arrow-right-bold-box />
+        <i i-mdi-arrow-right-bold-circle />
       </button>
       <br />
       <button
         @click="rockerClick(-1, 0)"
         :disabled="rockerDisable[3]"
       >
-        <i i-mdi-arrow-down-bold-box />
+        <i i-mdi-arrow-down-bold-circle />
       </button>
     </div>
   </div>
@@ -461,9 +461,9 @@ function checkResult() {
   }
   .rocker-area {
     transition: all 0.3s ease-in-out;
-    transform: translateY(100px);
+    transform: translateY(60px);
     opacity: 0;
-    margin-bottom: 20px;
+    padding-bottom: 20px;
     button {
       height: 56px;
       width: 56px;
