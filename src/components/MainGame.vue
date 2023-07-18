@@ -42,34 +42,36 @@
         <span v-if="gameResult === NB">{{ i18n('newBest') }}</span>
       </div>
     </div>
-    <div class="rocker-area">
-      <button
-        @click="rockerClick(1, 0)"
-        :disabled="rockerDisable[0]"
-      >
-        <i i-mdi-arrow-up-bold-circle />
-      </button>
-      <br />
-      <button
-        @click="rockerClick(0, 1)"
-        :disabled="rockerDisable[1]"
-      >
-        <i i-mdi-arrow-left-bold-circle />
-      </button>
-      <button
-        @click="rockerClick(0, -1)"
-        :disabled="rockerDisable[2]"
-      >
-        <i i-mdi-arrow-right-bold-circle />
-      </button>
-      <br />
-      <button
-        @click="rockerClick(-1, 0)"
-        :disabled="rockerDisable[3]"
-      >
-        <i i-mdi-arrow-down-bold-circle />
-      </button>
-    </div>
+    <Transition name="rocker">
+      <div v-if="rocker" class="rocker-area">
+        <button
+          @click="rockerClick(1, 0)"
+          :disabled="rockerDisable[0]"
+        >
+          <i i-mdi-arrow-up-bold-circle />
+        </button>
+        <br />
+        <button
+          @click="rockerClick(0, 1)"
+          :disabled="rockerDisable[1]"
+        >
+          <i i-mdi-arrow-left-bold-circle />
+        </button>
+        <button
+          @click="rockerClick(0, -1)"
+          :disabled="rockerDisable[2]"
+        >
+          <i i-mdi-arrow-right-bold-circle />
+        </button>
+        <br />
+        <button
+          @click="rockerClick(-1, 0)"
+          :disabled="rockerDisable[3]"
+        >
+          <i i-mdi-arrow-down-bold-circle />
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -290,6 +292,7 @@ function checkResult() {
   min-height: 100vh;
   box-sizing: border-box;
   color: #2c3e50;
+  overflow-y: auto;
   &.dark {
     background: #444;
     color: #eee;
@@ -311,10 +314,6 @@ function checkResult() {
     }
   }
   &.rocker {
-    .rocker-area {
-      transform: translateY(0);
-      opacity: 1;
-    }
     .score-area {
       margin-top: 20px;
     }
@@ -460,9 +459,6 @@ function checkResult() {
     }
   }
   .rocker-area {
-    transition: all 0.3s ease-in-out;
-    transform: translateY(60px);
-    opacity: 0;
     padding-bottom: 20px;
     button {
       height: 56px;
@@ -483,6 +479,15 @@ function checkResult() {
         color: #aaa;
       }
     }
+  }
+  .rocker-enter-active,
+  .rocker-leave-active {
+    transition: all 0.3s ease-in-out;
+  }
+  .rocker-enter-from,
+  .rocker-leave-to {
+    transform: translateY(80px);
+    opacity: 0;
   }
 }
 @media only screen and (min-width: 320px) and (max-width: 720px) {
