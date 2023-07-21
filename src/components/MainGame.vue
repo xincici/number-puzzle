@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" :class="`${theme} ${rocker? 'rocker' : '' }`">
+  <div class="wrapper" :class="`${rocker? 'rocker' : '' }`">
     <TopHeader />
     <div class="score-area">
       {{ i18n('bestScore') }}: {{ bestScore === null ? '--' : bestScore }}
@@ -80,7 +80,6 @@ import { ref, reactive, computed, watch, watchEffect } from 'vue';
 
 import EasterEgg from './EasterEgg.vue';
 import TopHeader from './TopHeader.vue';
-import { theme } from '../utils/theme';
 import confetti from '../utils/confetti';
 import { rocker } from '../utils/rocker';
 import { difficulty, changeDifficulty, MIN_DIFFICULTY, MAX_DIFFICULTY } from '../utils/difficulty';
@@ -291,28 +290,9 @@ function checkResult() {
   min-width: 360px;
   min-height: 100vh;
   box-sizing: border-box;
-  color: #2c3e50;
   overflow-y: auto;
-  &.dark {
-    background: #444;
-    color: #eee;
-    .header-wrapper {
-      border-bottom: 1px solid #333;
-    }
-    .game-area {
-      .win {
-        background-color: #333;
-      }
-      .cell .inner {
-        &.even {
-          background: rgba(210, 210, 210, 0.90);
-        }
-        &.odd {
-          background: rgba(125, 125, 125, 0.90);
-        }
-      }
-    }
-  }
+  background: var(--bg-color);
+  color: var(--text-color);
   &.rocker {
     .score-area {
       margin-top: 20px;
@@ -322,7 +302,7 @@ function checkResult() {
     }
   }
   .header-wrapper {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
   }
   .score-area {
     transition: margin-top 0.3s ease-in-out;
@@ -370,7 +350,7 @@ function checkResult() {
     margin: 40px auto 20px;
     padding: 15px;
     .win {
-      background-color: #f1f1f1;
+      background-color: var(--win-bg-color);
       position: absolute;
       width: 100%;
       height: 100%;
@@ -450,10 +430,10 @@ function checkResult() {
           animation: 0.08s ease-in-out 0s zoom;
         }
         &.even {
-          background-color: #e5e5e5;
+          background: var(--even-bg-color);
         }
         &.odd {
-          background-color: #ddffdd;
+          background: var(--odd-bg-color);
         }
       }
     }
