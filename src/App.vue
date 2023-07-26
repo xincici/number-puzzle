@@ -23,7 +23,6 @@ body {
   --text-color: #2c3e50;
   --bg-color: #fff;
   --mask-color: rgba(255, 255, 255, 0.8);
-  --win-bg-color: #f1f1f1;
   --even-bg-color: #e5e5e5;
   --odd-bg-color: #ddffdd;
   &.dark {
@@ -31,7 +30,6 @@ body {
     --text-color: #eee;
     --bg-color: #333;
     --mask-color: rgba(20, 20, 20, 0.8);
-    --win-bg-color: #333;
     --even-bg-color: rgba(210, 210, 210, 0.90);
     --odd-bg-color: rgba(125, 125, 125, 0.90);
   }

@@ -350,15 +350,15 @@ function checkResult() {
     margin: 40px auto 20px;
     padding: 15px;
     .win {
-      background-color: var(--win-bg-color);
+      background-color: var(--bg-color);
       position: absolute;
       width: 100%;
       height: 100%;
       left: 0;
       top: 0;
-      opacity: 0.95;
+      opacity: 0.85;
       font-weight: bold;
-      color: #11aa11;
+      color: #1b1;
       font-size: 18px;
       display: flex;
       flex-direction: column;
