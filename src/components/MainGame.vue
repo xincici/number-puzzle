@@ -295,18 +295,15 @@ function checkResult() {
   color: var(--text-color);
   &.rocker {
     .score-area {
-      margin-top: 20px;
+      margin-top: 70px;
     }
     .game-area {
       margin-top: 0px;
     }
   }
-  .header-wrapper {
-    border-bottom: 1px solid var(--border-color);
-  }
   .score-area {
     transition: margin-top 0.3s ease-in-out;
-    margin: 50px 0 15px;
+    margin: 100px 0 15px;
   }
   .opt-icon,.game-icon {
     cursor: pointer;
