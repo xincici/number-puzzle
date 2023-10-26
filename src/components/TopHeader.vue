@@ -31,7 +31,7 @@ import { rocker, toggle as toggleRocker } from '../utils/rocker';
 <style scoped lang="scss">
 .header-wrapper {
   background: var(--bg-color);
-  max-width: var(--max-width);
+  max-width: 480px;
   padding: 10px 8px;
   box-sizing: border-box;
   display: flex;
