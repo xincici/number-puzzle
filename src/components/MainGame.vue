@@ -123,6 +123,8 @@ let zoomTimer = null;
 let winTimer = null;
 let lastRandom = 0; // 最后一次随机的下标
 
+let eventInited = false;
+
 watchEffect(() => {
   bestScore.value = localStorage.getItem(storageKey.value) || null;
 });
@@ -148,6 +150,7 @@ function initGame() {
   clickCount.value = 0;
   lastRandom = 0;
   randomOperations();
+  addKeyboardHandler();
   toggleMask(0);
 }
 function clearTimer() {
@@ -172,6 +175,25 @@ function getRandom() {
     }
   }
   return neighbours[lastRandom];
+}
+function addKeyboardHandler() {
+  if (eventInited) return;
+  eventInited = true;
+  window.addEventListener('keyup', e => {
+    if (e.key === 'ArrowUp' && !rockerDisable.value[0]) {
+      e.preventDefault();
+      rockerClick(1, 0);
+    } else if (e.key === 'ArrowLeft' && !rockerDisable.value[1]) {
+      e.preventDefault();
+      rockerClick(0, 1);
+    } else if (e.key === 'ArrowRight' && !rockerDisable.value[2]) {
+      e.preventDefault();
+      rockerClick(0, -1);
+    } else if (e.key === 'ArrowDown' && !rockerDisable.value[3]) {
+      e.preventDefault();
+      rockerClick(-1, 0);
+    }
+  });
 }
 function randomOperations() {
   const len = difficulty.value;
